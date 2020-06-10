@@ -6,11 +6,12 @@
 /*   By: tbergkul <tbergkul@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/12 12:52:41 by tbergkul          #+#    #+#             */
-/*   Updated: 2020/02/17 12:14:53 by tbergkul         ###   ########.fr       */
+/*   Updated: 2020/06/10 13:58:44 by msiivone         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "wolf.h"
+#include <pthread.h>
 
 /*
 **	Line_draw_init will set 6 variables: nextx(nexty) is the distance that
@@ -136,10 +137,12 @@ void	draw_sky_floor(t_w *w)
 **	Then draws that part of the wall, sky and floor.
 */
 
-void	draw_map(t_w *w)
+void	*rendermt(void *arg)
 {
-	w->x = -1;
-	while (++w->x < WIN_W)
+	t_w *w;
+
+	w = (t_w*)arg;
+	while (w->x < w->xmax)
 	{
 		draw_init(w);
 		w->wallheight = (int)(WIN_H / w->walldst);
@@ -151,5 +154,26 @@ void	draw_map(t_w *w)
 			w->end = WIN_H - 1;
 		draw_walls(w);
 		draw_sky_floor(w);
+		++w->x;
 	}
+	return (0);
+}
+
+void	draw_map(t_w *data)
+{
+	pthread_t	threads[THREADS];
+	t_w			data_r[THREADS];
+	int			x;
+
+	x = 0;
+	while (x < THREADS)
+	{
+		ft_memcpy((void*)&data_r[x], (void*)data, sizeof(t_w));
+		data_r[x].x = x * (WIN_W / THREADS);
+		data_r[x].xmax = (x + 1) * (WIN_W / THREADS);
+		pthread_create(&threads[x], NULL, rendermt, &data_r[x]);
+		x++;
+	}
+	while (x--)
+		pthread_join(threads[x], NULL);
 }

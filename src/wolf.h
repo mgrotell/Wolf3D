@@ -35,6 +35,12 @@
 # define GREEN 0x006400
 
 /*
+**	THREADS
+*/
+
+# define THREADS 8
+
+/*
 **	Shortenings for some functions.
 */
 
@@ -111,6 +117,7 @@ typedef struct	s_w
 	int			stepy;
 	int			start;
 	int			end;
+	int			xmax;
 	int			wallheight;
 	int			color;
 	int			side;
